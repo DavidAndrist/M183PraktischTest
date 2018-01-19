@@ -19,34 +19,46 @@ namespace Pruefung_Praktisch_Musterloesung.Controllers
         * 
         * ANTWORTEN BITTE HIER
         * 
+        * 2.1 Die Session-ID des Users wird nicht gecheckt
+        *     Der Browser, welcher der User benutzt, wird ebenfalls nicht überprüft
+        * 
+        * 2.2 Wenn man die Session-ID nicht bei jeder Request verändert, kann ein Hacker die Session-ID eines anderen Users klauen
+        *     Wenn man den Browser nicht überprüft, kann man nichts unternehmen, wenn ein komischer Browser sich einloggt.
+        * 
         * */
+    public ActionResult Index()
+    {
 
-        public ActionResult Index() {
+        var sessionid = Request.QueryString["sid"];
 
-            var sessionid = Request.QueryString["sid"];
-
-            if (string.IsNullOrEmpty(sessionid))
-            {
-                var hash = (new SHA1Managed()).ComputeHash(Encoding.UTF8.GetBytes(DateTime.Now.ToString()));
-                sessionid = string.Join("", hash.Select(b => b.ToString("x2")).ToArray());
-            }
-
-            ViewBag.sessionid = sessionid;
-
-            return View();
-        }
-
-        [HttpPost]
-        public ActionResult Login()
+        if (string.IsNullOrEmpty(sessionid))
         {
-            var username = Request["username"];
-            var password = Request["password"];
-            var sessionid = Request.QueryString["sid"];
+            var hash2 = (new SHA1Managed()).ComputeHash(Encoding.UTF8.GetBytes(DateTime.Now.ToString()));
+            sessionid = string.Join("", hash2.Select(b => b.ToString("x2")).ToArray());
+           }
 
-            // hints:
-            //var used_browser = Request.Browser.Platform;
-            //var ip = Request.UserHostAddress;
+        // Hier session ID neu generieren für folgende Requests
+        var hash = (new SHA1Managed()).ComputeHash(Encoding.UTF8.GetBytes(DateTime.Now.ToString()));
+        sessionid = string.Join("", hash.Select(b => b.ToString("x2")).ToArray());
 
+        ViewBag.sessionid = sessionid;
+
+        return View();
+    }
+
+       [HttpPost]
+    public ActionResult Login()
+    {
+        var username = Request["username"];
+        var password = Request["password"];
+        var sessionid = Request.QueryString["sid"];
+
+        // Browser und IP überprüfen
+        var used_browser = Request.Browser.Platform;
+        var ip = Request.UserHostAddress;
+
+        if (used_browser == "Bekannter Broweser" && ip == "Häufig genutzte IP-Adresse")
+        {
             Lab2Userlogin model = new Lab2Userlogin();
 
             if (model.checkCredentials(username, password))
@@ -62,39 +74,47 @@ namespace Pruefung_Praktisch_Musterloesung.Controllers
             }
             else
             {
-                ViewBag.message = "Wrong Credentials";
+                ViewBag.message = "Falsche Angaben";
                 return View();
             }
         }
-
-        public ActionResult Backend()
+        else
         {
-            var sessionid = "";
+            ViewBag.message = "Browser/IP-Adresse verdächtig";
+            return View();
+        }
 
-            if (Request.Cookies.AllKeys.Contains("sid"))
-            {
-                sessionid = Request.Cookies["sid"].Value.ToString();
-            }           
 
-            if (!string.IsNullOrEmpty(Request.QueryString["sid"]))
-            {
-                sessionid = Request.QueryString["sid"];
-            }
-            
-            // hints:
-            //var used_browser = Request.Browser.Platform;
-            //var ip = Request.UserHostAddress;
+    }
 
-            Lab2Userlogin model = new Lab2Userlogin();
+    public ActionResult Backend()
+    {
+        var sessionid = "";
 
-            if (model.checkSessionInfos(sessionid))
-            {
-                return View();
-            }
-            else
-            {
-                return RedirectToAction("Index", "Lab2");
-            }              
+        if (Request.Cookies.AllKeys.Contains("sid"))
+        {
+            sessionid = Request.Cookies["sid"].Value.ToString();
+        }
+
+        if (!string.IsNullOrEmpty(Request.QueryString["sid"]))
+        {
+            sessionid = Request.QueryString["sid"];
+        }
+
+        //var used_browser = Request.Browser.Platform;
+        //var ip = Request.UserHostAddress;
+
+        Lab2Userlogin model = new Lab2Userlogin();
+
+        if (model.checkSessionInfos(sessionid))
+        {
+            return View();
+        }
+        else
+        {
+            return RedirectToAction("Index", "Lab2");
         }
     }
+}
+
 }

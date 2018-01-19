@@ -13,38 +13,40 @@ namespace Pruefung_Praktisch_Musterloesung.Controllers
 
         /**
         * 
-        * ANTWORTEN BITTE HIER
+        ANTWORTEN BITTE HIER
         * 
+        * 3.1 Man kann im Kommentar Javascript mitgeben
+        * 
+        * 3.2 Der Hacker kann im Kommentar JavaScript mitgeben welches beim nächsten Refresh von der Seite ausgeführt wird. 
+        * 
+        * 3.2 http://Webseite.ch/Lab3/comment?comment="\"window.alert("Sie wurden gehackt");\""
         * */
-
-        public ActionResult Index() {
-
-            Lab3Postcomments model = new Lab3Postcomments();
-
-            return View(model.getAllData());
-        }
 
         public ActionResult Backend()
         {
             return View();
         }
 
-        [ValidateInput(false)] // -> we allow that html-tags are submitted!
+        [ValidateInput(false)] // -> Hier erlaubt man das mitgeben von HTML Tags
         [HttpPost]
         public ActionResult Comment()
         {
             var comment = Request["comment"];
             var postid = Int32.Parse(Request["postid"]);
 
+            // Gefährliche Chars entfernen
+            comment = comment.Replace("'", String.Empty);
+            comment = comment.Replace("\"", String.Empty);
+
             Lab3Postcomments model = new Lab3Postcomments();
 
             if (model.storeComment(postid, comment))
-            {  
+            {
                 return RedirectToAction("Index", "Lab3");
             }
             else
             {
-                ViewBag.message = "Failed to Store Comment";
+                ViewBag.message = "Speichern des Kommentars fehlgeschlagen";
                 return View();
             }
         }
@@ -63,7 +65,7 @@ namespace Pruefung_Praktisch_Musterloesung.Controllers
             }
             else
             {
-                ViewBag.message = "Wrong Credentials";
+                ViewBag.message = "Falsche Angaben";
                 return View();
             }
         }

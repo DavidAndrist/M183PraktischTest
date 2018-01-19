@@ -10,10 +10,18 @@ namespace Pruefung_Praktisch_Musterloesung.Controllers
     public class Lab1Controller : Controller
     {
         /**
-         * 1.1 Weil man einerseits den Filepfad als Parameter abändern kann
+        * ANTWORTEN BITTE HIER
          * 
+         * 1.1 In der Url wird der DBdatei-Name mitgegeben. Ein Hacker kann dies nutzen um eine falsche DB anzubinden
+         *     In der Url wird der Name des Bildes mitgegeben
          * 
+         * 1.2 http://Webseite.ch/Lab1/index?file="gehackte_DB"
+         *     http://Webseite.ch/Lab1/index?file="DeineDaten.doc"
+         * 
+         * 1.3 Mit der Url könnte der Hacker eine DBdatei ansprechen. Dadurch könnte er sich Zugriff auf die Daten verschaffen, obwohl er keine Rechte dazu hat.
+         *     Der Hacker könnte durch die URL eine andere Datei ansprechen.
          * */
+
 
 
         public ActionResult Index()
